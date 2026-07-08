@@ -44,3 +44,34 @@ TYPED_TEST(MPSC, sum_ones) {
 
     ASSERT_EQ(sum, 2 * NUM_ELEMENTS);
 }
+
+TYPED_TEST(MPSC, sum_itoa) {
+    constexpr auto NUM_ELEMENTS = 10000;
+    size_t sum_producer[2] = {0};
+    size_t sum_customer = 0;
+
+    auto producer = [&rb = this->rb, &sum_producer](int pos){
+        for(auto i = 0u; i < NUM_ELEMENTS; ++i){
+            while(!rb.put(i)){}
+            sum_producer[pos] += i;
+        }
+    };
+
+    std::thread producer_1(producer, 0);
+    std::thread producer_2(producer, 1);
+    std::thread customer([&rb = this->rb, &sum_customer](){
+        for(auto i = 0u; i < 2 * NUM_ELEMENTS; ++i){
+            auto el = rb.get();
+            while(!el)
+                el = rb.get();
+
+            sum_customer += *el;
+        }
+    });
+
+    producer_1.join();
+    producer_2.join();
+    customer.join();
+
+    ASSERT_EQ(sum_customer, sum_producer[0] + sum_producer[1]);
+}
