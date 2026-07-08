@@ -5,7 +5,7 @@
 
 template <typename T, unsigned Size>
 class atomic_ring_buffer {
-    struct entry{
+    struct alignas(8) entry{
         struct {
             unsigned seq : 31;
             unsigned used : 1  = 0;
@@ -31,7 +31,7 @@ public:
             auto wr_entry = elements[wr_index % Size].load();
             auto seq = wr_entry.seq;
 
-            if(seq == wr_index){
+            if(seq == wr_index && wr_entry.used == 0){
                 entry data_entry;
                 data_entry.seq = wr_index;
                 data_entry.used = 1;
@@ -42,7 +42,7 @@ public:
                     return true;
                 }
             }
-            else if((seq + Size) == wr_index){
+            else if((seq + Size) == wr_index && wr_entry.used == 1){
                 //queue is full
                 return false;
             }

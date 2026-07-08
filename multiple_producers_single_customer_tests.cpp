@@ -2,13 +2,25 @@
 #include <thread>
 
 #include "mutex_ring_buffer.hpp"
+#include "atomic_ring_buffer.hpp"
 
-TEST(MPSC, sum_ones) {
-    constexpr auto NUM_ELEMENTS = 1000;
-    mutex_ring_buffer<int, 5> rb;
+template <typename ring_buffer_type>
+struct MPSC : ::testing::Test{
+    ring_buffer_type rb;
+};
+
+using testing::Types;
+
+using implementations = Types<mutex_ring_buffer<int, 5>,
+                              atomic_ring_buffer<int, 5>>;
+
+TYPED_TEST_SUITE(MPSC, implementations);
+
+TYPED_TEST(MPSC, sum_ones) {
+    constexpr auto NUM_ELEMENTS = 10000;
     unsigned sum = 0;
 
-    auto producer = [&rb](){
+    auto producer = [&rb = this->rb](){
         for(auto i = 0u; i < NUM_ELEMENTS; ++i){
             while(!rb.put(1)){}
         }
@@ -16,7 +28,7 @@ TEST(MPSC, sum_ones) {
 
     std::thread producer_1(producer);
     std::thread producer_2(producer);
-    std::thread customer([&rb, &sum](){
+    std::thread customer([&rb = this->rb, &sum](){
         for(auto i = 0u; i < 2 * NUM_ELEMENTS; ++i){
             auto el = rb.get();
             while(!el)
