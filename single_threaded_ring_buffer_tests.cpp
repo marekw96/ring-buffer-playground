@@ -2,6 +2,7 @@
 
 #include "no_lock_ring_buffer.hpp"
 #include "mutex_ring_buffer.hpp"
+#include "atomic_ring_buffer.hpp"
 
 template <typename ring_buffer_type>
 struct ST : ::testing::Test{
@@ -11,7 +12,8 @@ struct ST : ::testing::Test{
 using testing::Types;
 
 using implementations = Types<no_lock_ring_buffer<int, 5>,
-                              mutex_ring_buffer<int, 5>>;
+                              mutex_ring_buffer<int, 5>,
+                              atomic_ring_buffer<int, 5>>;
 
 TYPED_TEST_SUITE(ST, implementations);
 
