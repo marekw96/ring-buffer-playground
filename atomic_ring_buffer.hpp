@@ -1,7 +1,6 @@
 #pragma once
 
 #include <atomic>
-#include <print>
 
 template <typename T, unsigned Size>
 class atomic_ring_buffer {
