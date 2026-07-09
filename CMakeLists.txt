@@ -17,16 +17,14 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(single_threaded_ring_buffer_tests single_threaded_ring_buffer_tests.cpp)
-target_link_libraries(single_threaded_ring_buffer_tests GTest::gtest_main GTest::gtest)
+add_executable(singlethread_tests single_threaded_ring_buffer_tests.cpp)
+target_link_libraries(singlethread_tests GTest::gtest_main GTest::gtest)
 
-add_executable(single_producer_single_customer_tests single_producer_single_customer_tests.cpp)
-target_link_libraries(single_producer_single_customer_tests GTest::gtest_main GTest::gtest)
-
-add_executable(multiple_producers_single_customer_tests multiple_producers_single_customer_tests.cpp)
-target_link_libraries(multiple_producers_single_customer_tests GTest::gtest_main GTest::gtest)
+add_executable(multithread_tests single_producer_single_customer_tests.cpp
+                                 multiple_producers_single_customer_tests.cpp
+                                 multiple_producers_multiple_customer_tests.cpp)
+target_link_libraries(multithread_tests GTest::gtest_main GTest::gtest)
 
 include(GoogleTest)
-gtest_discover_tests(single_threaded_ring_buffer_tests)
-gtest_discover_tests(single_producer_single_customer_tests)
-gtest_discover_tests(multiple_producers_single_customer_tests)
+gtest_discover_tests(singlethread_tests)
+gtest_discover_tests(multithread_tests)
